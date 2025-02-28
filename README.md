@@ -48,6 +48,9 @@ zig build test
 
 ### As a Library
 
+You can include zvdk in your Zig project in several ways:
+
+#### Option 1: Using Zig Build System
 ```zig
 const std = @import("std");
 const zvdk = @import("zvdk");
@@ -68,6 +71,61 @@ pub fn main() !void {
     
     // Clean up
     client.teardown();
+}
+```
+
+#### Option 2: Using Zig Package Manager (zon)
+
+Add zvdk to your `build.zig.zon` file:
+
+```zig
+.{
+    .name = "your-app",
+    .version = "0.1.0",
+    .dependencies = .{
+        .zvdk = .{
+            .url = "https://github.com/bkataru/zvdk/archive/refs/tags/v0.1.0.tar.gz",
+            .hash = "12200...", // Replace with the actual hash after adding the dependency
+        },
+    },
+}
+```
+
+Then, in your `build.zig`:
+
+```zig
+const std = @import("std");
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+
+    const exe = b.addExecutable(.{
+        .name = "your-app",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // Add zvdk as a dependency
+    const zvdk_dep = b.dependency("zvdk", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.addModule("zvdk", zvdk_dep.module("zvdk"));
+
+    b.installArtifact(exe);
+}
+```
+
+In your code, you can then import and use zvdk:
+
+```zig
+const std = @import("std");
+const zvdk = @import("zvdk");
+
+pub fn main() !void {
+    // Your code using zvdk
 }
 ```
 
