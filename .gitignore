@@ -1,0 +1,32 @@
+# Zig build artifacts
+.zig-cache/
+zig-out/
+target/
+
+# IDE and editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Debug files
+.gdb_history
+peda-session-*.txt
+
+# Test artifacts
+config.test.json
+
+# Generated documentation
+docs/generated/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Editor backup files
+*.bak
+*.tmp
+
+# Segments directory (for testing)
+segments/
