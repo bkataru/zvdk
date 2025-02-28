@@ -53,43 +53,19 @@ const std = @import("std");
 const zvdk = @import("zvdk");
 
 pub fn main() !void {
-    // Initialize
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
-    // Initialize RTSP client
-    var client = try zvdk.rtsp.RtspClient.init(allocator, rtsp_url, .{}, null);
+    var client = try RtspClient.init(allocator);
     defer client.deinit();
-
-    // Connect and setup
-    try client.connect();
-    try client.describe();
+    
+    try client.connect("rtsp://example.com/stream");
     try client.setup();
-
-    // Initialize components
-    var h264_parser = zvdk.media.h264.H264Parser.init(allocator);
-    defer h264_parser.deinit();
-    
-    var ts_encoder = zvdk.ts.TsEncoder.init(allocator);
-    defer ts_encoder.deinit();
-    
-    var segmenter = try zvdk.ts.Segmenter.init(allocator, output_dir, 10000, 6);
-    defer segmenter.deinit();
-
-    // Start HLS server
-    var hls_server = try zvdk.hls.HlsServer.init(allocator, output_dir, 8080);
-    _ = try std.Thread.spawn(.{}, hls_server.start, .{});
-
-    // Start playing
     try client.play();
     
     // Process frames
-    while (true) {
+    while (client.isPlaying()) {
         // Process RTSP stream
         // See full example in examples directory
     }
-
+    
     // Clean up
     client.teardown();
 }
@@ -137,3 +113,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Inspired by various media processing libraries and RTSP clients
 - Thanks to the Zig community for the great language and tools
+- Special thanks to the following open source projects that provided valuable references:
+  - [media-server](https://github.com/ireader/media-server) - A comprehensive C/C++ implementation of various media protocols
+  - [cpp_hls](https://github.com/pedro-vicente/cpp_hls) - A C++ implementation of HLS streaming
+  - [vdk](https://github.com/deepch/vdk) - Go Video Development Kit with RTSP, RTMP, and HLS support
